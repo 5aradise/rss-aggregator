@@ -7,37 +7,28 @@ import (
 
 	"github.com/5aradise/rss-aggregator/config"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/cors"
 )
 
-func Run(cfg config.Config) error {
-	r := chi.NewRouter()
+type Server struct {
+	cfg config.Config
+	mux *chi.Mux
+}
 
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
+func New(cfg config.Config) *Server {
+	s := &Server{cfg, chi.NewRouter()}
 
-	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"https://*", "http://*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"*"},
-		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: false,
-		MaxAge:           300,
-	}))
+	setMiddlewares(s)
+	setHandlers(s)
 
-	v1R := chi.NewRouter()
-	v1R.Get("/healthz", handlerReadiness)
+	return s
+}
 
-	r.Mount("/v1", v1R)
-
+func (s *Server) Run() error {
 	srv := &http.Server{
-		Addr:    net.JoinHostPort("", cfg.Server.Port),
-		Handler: r,
+		Addr:    net.JoinHostPort("", s.cfg.Port),
+		Handler: s.mux,
 	}
 
-	log.Printf("Starting HTTP server on port %s", cfg.Server.Port)
+	log.Printf("Starting HTTP server on port %s", s.cfg.Port)
 	return srv.ListenAndServe()
 }

@@ -6,20 +6,17 @@ import (
 )
 
 type Config struct {
-	Server struct {
-		Port string
-	}
+	Port string
 }
 
-var Cfg Config
-
-func Load() error {
+func LoadFromEnv() (Config, error) {
 	port := os.Getenv("PORT")
 	if port == "" {
-		return errors.New("PORT is not found in the enviroment")
+		return Config{}, errors.New("PORT is not found in the enviroment")
 	}
 
-	Cfg.Server.Port = port
+	cfg := Config{}
+	cfg.Port = port
 
-	return nil
+	return cfg, nil
 }

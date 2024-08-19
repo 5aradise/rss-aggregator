@@ -1,5 +1,5 @@
 .env
 
-/cmd/rss-aggregator/rss-aggregator
+bin
 *.exe
 *.exe~

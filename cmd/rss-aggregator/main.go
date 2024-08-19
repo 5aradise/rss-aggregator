@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"path/filepath"
 
 	"github.com/5aradise/rss-aggregator/config"
 	"github.com/5aradise/rss-aggregator/internal/app"
@@ -10,14 +9,16 @@ import (
 )
 
 func main() {
-	godotenv.Load(filepath.Join("..", "..", ".env"))
+	godotenv.Load()
 
-	err := config.Load()
+	cfg, err := config.LoadFromEnv()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = app.Run(config.Cfg)
+	server := app.New(cfg)
+
+	err = server.Run()
 	if err != nil {
 		log.Fatal(err)
 	}
