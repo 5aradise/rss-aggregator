@@ -4,9 +4,12 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func setHandlers(s *Server) {
+func (app *App) setHandlers(mux *chi.Mux) {
 	v1R := chi.NewRouter()
 	v1R.Get("/healthz", handlerReadiness)
 
-	s.mux.Mount("/v1", v1R)
+	v1R.Post("/users", app.createUser)
+	v1R.Get("/users", app.listUsers)
+
+	mux.Mount("/v1", v1R)
 }

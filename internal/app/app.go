@@ -1,34 +1,42 @@
 package app
 
 import (
+	"database/sql"
 	"log"
 	"net"
 	"net/http"
 
 	"github.com/5aradise/rss-aggregator/config"
+	"github.com/5aradise/rss-aggregator/internal/db"
 	"github.com/go-chi/chi/v5"
+
+	_ "github.com/lib/pq"
 )
 
-type Server struct {
-	cfg config.Config
-	mux *chi.Mux
+type App struct {
+	db *db.Queries
 }
 
-func New(cfg config.Config) *Server {
-	s := &Server{cfg, chi.NewRouter()}
-
-	setMiddlewares(s)
-	setHandlers(s)
-
-	return s
-}
-
-func (s *Server) Run() error {
-	srv := &http.Server{
-		Addr:    net.JoinHostPort("", s.cfg.Port),
-		Handler: s.mux,
+func Run(cfg config.Config) error {
+	conn, err := sql.Open("postgres", cfg.DbURL)
+	if err != nil {
+		return err
 	}
 
-	log.Printf("Starting HTTP server on port %s", s.cfg.Port)
+	app := App{
+		db: db.New(conn),
+	}
+
+	r := chi.NewRouter()
+
+	app.setMiddlewares(r)
+	app.setHandlers(r)
+
+	srv := &http.Server{
+		Addr:    net.JoinHostPort("", cfg.Port),
+		Handler: r,
+	}
+
+	log.Printf("Starting HTTP server on port %s", cfg.Port)
 	return srv.ListenAndServe()
 }

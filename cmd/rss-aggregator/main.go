@@ -16,9 +16,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	server := app.New(cfg)
-
-	err = server.Run()
+	err = app.Run(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}

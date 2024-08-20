@@ -6,7 +6,8 @@ import (
 )
 
 type Config struct {
-	Port string
+	Port  string
+	DbURL string
 }
 
 func LoadFromEnv() (Config, error) {
@@ -15,8 +16,14 @@ func LoadFromEnv() (Config, error) {
 		return Config{}, errors.New("PORT is not found in the enviroment")
 	}
 
+	dbURL := os.Getenv("DB_URL")
+	if dbURL == "" {
+		return Config{}, errors.New("DB_URL is not found in the enviroment")
+	}
+
 	cfg := Config{}
 	cfg.Port = port
+	cfg.DbURL = dbURL
 
 	return cfg, nil
 }
