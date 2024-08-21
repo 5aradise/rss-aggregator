@@ -12,9 +12,10 @@ import (
 	"github.com/google/uuid"
 )
 
-func (app *App) createUser(w http.ResponseWriter, r *http.Request) {
+func (app *App) createFeed(w http.ResponseWriter, r *http.Request, user entities.User) {
 	type reqParams struct {
 		Name string `json:"name"`
+		URL  string `json:"url"`
 	}
 
 	params := reqParams{}
@@ -25,30 +26,28 @@ func (app *App) createUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	now := time.Now().UTC()
-	user, err := app.db.CreateUser(r.Context(), db.CreateUserParams{
+	feed, err := app.db.CreateFeed(r.Context(), db.CreateFeedParams{
 		ID:        uuid.New(),
 		CreatedAt: now,
 		UpdatedAt: now,
 		Name:      params.Name,
+		Url:       params.URL,
+		UserID:    user.ID,
 	})
 	if err != nil {
 		resp.WithError(w, http.StatusBadRequest, fmt.Sprintf("Couldn`t create user: %v", err))
 		return
 	}
 
-	resp.WithJSON(w, http.StatusCreated, entities.ConvertDbUser(user))
+	resp.WithJSON(w, http.StatusCreated, entities.ConvertDbFeed(feed))
 }
 
-func (app *App) listUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := app.db.ListUsers(r.Context())
+func (app *App) listFeeds(w http.ResponseWriter, r *http.Request) {
+	feeds, err := app.db.ListFeeds(r.Context())
 	if err != nil {
 		resp.WithError(w, http.StatusBadRequest, fmt.Sprintf("Couldn`t create user: %v", err))
 		return
 	}
 
-	resp.WithJSON(w, http.StatusOK, entities.ConvertDbUsers(users))
-}
-
-func (app *App) getUser(w http.ResponseWriter, r *http.Request, user entities.User) {
-	resp.WithJSON(w, http.StatusOK, user)
+	resp.WithJSON(w, http.StatusOK, entities.ConvertDbFeeds(feeds))
 }
