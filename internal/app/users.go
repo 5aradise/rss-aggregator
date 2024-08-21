@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/5aradise/rss-aggregator/internal/auth"
 	"github.com/5aradise/rss-aggregator/internal/db"
 	"github.com/5aradise/rss-aggregator/internal/entities"
 	"github.com/5aradise/rss-aggregator/pkg/req"
@@ -18,7 +19,7 @@ func (app *App) createUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	params := reqParams{}
-	err := req.Decode(r, &params)
+	err := req.DecodeJSON(r, &params)
 	if err != nil {
 		resp.WithError(w, http.StatusBadRequest, fmt.Sprintf("Error parsing JSON: %v", err))
 		return
@@ -36,7 +37,7 @@ func (app *App) createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp.WithJSON(w, http.StatusOK, entities.ConvertDbUser(user))
+	resp.WithJSON(w, http.StatusCreated, entities.ConvertDbUser(user))
 }
 
 func (app *App) listUsers(w http.ResponseWriter, r *http.Request) {
@@ -47,4 +48,20 @@ func (app *App) listUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp.WithJSON(w, http.StatusOK, entities.ConvertDbUsers(users))
+}
+
+func (app *App) getUser(w http.ResponseWriter, r *http.Request) {
+	apiKey, err := auth.GetApiKey(r.Header)
+	if err != nil {
+		resp.WithError(w, http.StatusForbidden, err.Error())
+		return
+	}
+
+	user, err := app.db.GetUserByApiKey(r.Context(), apiKey)
+	if err != nil {
+		resp.WithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	resp.WithJSON(w, http.StatusOK, entities.ConvertDbUser(user))
 }

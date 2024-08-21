@@ -9,7 +9,8 @@ func (app *App) setHandlers(mux *chi.Mux) {
 	v1R.Get("/healthz", handlerReadiness)
 
 	v1R.Post("/users", app.createUser)
-	v1R.Get("/users", app.listUsers)
+	v1R.Get("/users/list", app.listUsers)
+	v1R.Get("/users", app.getUser)
 
 	mux.Mount("/v1", v1R)
 }
