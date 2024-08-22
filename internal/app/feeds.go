@@ -35,7 +35,19 @@ func (app *App) createFeed(w http.ResponseWriter, r *http.Request, user entities
 		UserID:    user.ID,
 	})
 	if err != nil {
-		resp.WithError(w, http.StatusBadRequest, fmt.Sprintf("Couldn`t create user: %v", err))
+		resp.WithError(w, http.StatusBadRequest, fmt.Sprintf("Couldn`t create feed: %v", err))
+		return
+	}
+
+	_, err = app.db.CreateFeedFollow(r.Context(), db.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: now,
+		UpdatedAt: now,
+		UserID:    user.ID,
+		FeedID:    feed.ID,
+	})
+	if err != nil {
+		resp.WithError(w, http.StatusBadRequest, fmt.Sprintf("Couldn`t create feed follow: %v", err))
 		return
 	}
 
@@ -45,7 +57,7 @@ func (app *App) createFeed(w http.ResponseWriter, r *http.Request, user entities
 func (app *App) listFeeds(w http.ResponseWriter, r *http.Request) {
 	feeds, err := app.db.ListFeeds(r.Context())
 	if err != nil {
-		resp.WithError(w, http.StatusBadRequest, fmt.Sprintf("Couldn`t create user: %v", err))
+		resp.WithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 

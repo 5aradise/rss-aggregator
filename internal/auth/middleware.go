@@ -14,13 +14,13 @@ func Middleware(db *db.Queries, h authedHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		apiKey, err := GetApiKey(r.Header)
 		if err != nil {
-			resp.WithError(w, http.StatusForbidden, err.Error())
+			resp.WithError(w, http.StatusUnauthorized, "Bad request: "+err.Error())
 			return
 		}
 
 		user, err := db.GetUserByApiKey(r.Context(), apiKey)
 		if err != nil {
-			resp.WithError(w, http.StatusBadRequest, err.Error())
+			resp.WithError(w, http.StatusUnauthorized, "Bad request: "+err.Error())
 			return
 		}
 

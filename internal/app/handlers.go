@@ -16,5 +16,10 @@ func (app *App) setHandlers(mux *chi.Mux) {
 	v1R.Post("/feeds", auth.Middleware(app.db, app.createFeed))
 	v1R.Get("/feeds", app.listFeeds)
 
+	v1R.Post("/feed_follows", auth.Middleware(app.db, app.createFeedFollow))
+	v1R.Get("/feed_follows/list", app.listFeedFollows)
+	v1R.Get("/feed_follows", auth.Middleware(app.db, app.getFeedFollows))
+	v1R.Delete("/feed_follows/{feedFollowID}", auth.Middleware(app.db, app.deleteFeedFollow))
+
 	mux.Mount("/v1", v1R)
 }

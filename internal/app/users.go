@@ -42,7 +42,7 @@ func (app *App) createUser(w http.ResponseWriter, r *http.Request) {
 func (app *App) listUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := app.db.ListUsers(r.Context())
 	if err != nil {
-		resp.WithError(w, http.StatusBadRequest, fmt.Sprintf("Couldn`t create user: %v", err))
+		resp.WithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
