@@ -21,5 +21,7 @@ func (app *App) setHandlers(mux *chi.Mux) {
 	v1R.Get("/feed_follows", auth.Middleware(app.db, app.getFeedFollows))
 	v1R.Delete("/feed_follows/{feedFollowID}", auth.Middleware(app.db, app.deleteFeedFollow))
 
+	v1R.Get("/posts", auth.Middleware(app.db, app.listPostsForUser))
+
 	mux.Mount("/v1", v1R)
 }
